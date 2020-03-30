@@ -156,6 +156,8 @@ string solution(int n, int t, int m, vector<string> timetable)
                     tmp_mm = 59;
                     tmp_hh -= 1;
                 }
+                else
+                    tmp_mm -= 1;
                 info output = {tmp_hh, tmp_mm};
                 cout << tmp_hh << " " << tmp_mm;
                 answer = convert(output);
