@@ -94,6 +94,7 @@ string recursive(string p)
         }
         return (tmp);
     }
+    return (v);
 }
 
 string solution(string p)
@@ -101,4 +102,14 @@ string solution(string p)
     string answer = "";
     answer = recursive(p);
     return answer;
+}
+
+int main(void)
+{
+    string str = "test";
+    string tmp = str.substr(4);
+    cout<<tmp;
+    string t;
+    t+=tmp;
+    cout<<t<<endl;
 }

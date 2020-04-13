@@ -32,6 +32,7 @@ vector<string> make_map(vector<string> &map1, vector<string> &map2)
         }
         tmp.push_back(str);
     }
+    return (tmp);
 }
 
 int to_binary(int n, int number, vector<string> &map)
@@ -55,21 +56,23 @@ int to_binary(int n, int number, vector<string> &map)
     return (0);
 }
 
-void arr_cal(int n, vector<int> &arr1, vector<int> &arr2)
+vector<string> arr_cal(int n, vector<int> &arr1, vector<int> &arr2)
 {
     vector<string> map1;
     vector<string> map2;
+    vector<string> ans;
     for (int i = 0; i < arr1.size(); i++)
     {
         to_binary(n, arr1[i], map1);
         to_binary(n, arr2[i], map2);
     }
-    make_map(map1, map2);
+    ans = make_map(map1, map2);
+    return ans;
 }
 
 vector<string> solution(int n, vector<int> arr1, vector<int> arr2)
 {
     vector<string> answer;
-    arr_cal(n, arr1, arr2);
+    answer = arr_cal(n, arr1, arr2);
     return answer;
 }

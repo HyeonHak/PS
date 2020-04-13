@@ -15,7 +15,7 @@ void rotation(vector<vector<int>> &key)
     {
         for (int x = 0; x < key.size(); x++)
         {
-            tmp[y][x] = key[key.size() - 1 + x][y];
+            //tmp[y][x] = key[key.size() - 1 + x][y];
             tmp[x][key.size() - 1 - y] = key[y][x];
         }
     }

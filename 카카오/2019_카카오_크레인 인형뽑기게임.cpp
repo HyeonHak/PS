@@ -14,7 +14,7 @@ void box_move(int doll)
     {
         if (box.back() == doll)
         {
-            ans++;
+            ans += 2;
             box.pop_back();
         }
         else
