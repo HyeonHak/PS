@@ -38,10 +38,10 @@ int main(void)
         if (ans == arr[0])
             ans = arr[0];
         else if (ans > arr[0])
-            ans = ans;
+            ans = arr[0];
         else if (ans < arr[0])
         {
-            if (ans - 1 != arr[0])
+            if (ans + 1 != arr[0])
                 ans = ans + 1;
             else
                 ans = ans;

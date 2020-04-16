@@ -90,12 +90,5 @@ int main()
         cin >> arr[i];
     }
     map_setting();
-    for (int i = 0; i <= 42; i++)
-    {
-        for (int j = 0; j < vec[i][0].size(); j++)
-        {
-            cout << vec[i][j] << " ";
-        }
-        cout << endl;
-    }
+    
 }
