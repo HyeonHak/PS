@@ -1,36 +1,33 @@
 #include <iostream>
 #include <queue>
 #include <vector>
-#include <cstring>
 using namespace std;
 
-int n, m, r, g, ans;
-int r_cnt, g_cnt;
-int map[51][51];
-int covermap[51][51];
-
-vector<int> red, green;
-
-bool check[11];
-
-typedef struct info
+typedef struct Info
 {
     int y;
     int x;
+    int color;
 } info;
-queue<info> RED, GREEN;
 
+int n, m, g, r, ans;
+int g_cnt;
+int r_cnt;
+int map[51][51];
+int new_map[51][51];
+int dir[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+int map_state[51][51];
 vector<info> candidate;
-bool inside(int y, int x)
+info input;
+
+int inside(int y, int x)
 {
     return y >= 0 && y < n && x >= 0 && x < m;
 }
-int dir[4][2] = {{-1, 0}, {0, 1}, {0, -1}, {0, 1}};
 
 void Input()
 {
-    info data;
-    cin >> n >> m >> r >> g;
+    cin >> n >> m >> g >> r;
     for (int y = 0; y < n; y++)
     {
         for (int x = 0; x < m; x++)
@@ -38,164 +35,114 @@ void Input()
             cin >> map[y][x];
             if (map[y][x] == 2)
             {
-                data.y = y;
-                data.x = x;
-                candidate.push_back(data);
+                input.y = y;
+                input.x = x;
+                candidate.push_back(input);
             }
         }
     }
-    r_cnt = r;
     g_cnt = g;
+    r_cnt = r;
 }
 
-void drop()
+void copy()
 {
-    info data;
-    for (int i = 0; i < red.size(); i++)
-    {
-        map[candidate[red[i]].y][candidate[red[i]].x] = 3;
-        data.y = candidate[red[i]].y;
-        data.x = candidate[red[i]].x;
-        RED.push(data);
-    }
-    for (int i = 0; i < green.size(); i++)
-    {
-        map[candidate[green[i]].y][candidate[green[i]].x] = 4;
-        data.y = candidate[green[i]].y;
-        data.x = candidate[green[i]].x;
-        GREEN.push(data);
-    }
-}
-
-void print_map()
-{
-    //cout << endl;
     for (int y = 0; y < n; y++)
     {
         for (int x = 0; x < m; x++)
         {
-            covermap[y][x] = map[y][x];
-            //  cout << map[y][x] << " ";
+            new_map[y][x] = map[y][x];
+            map_state[y][x] = 0;
         }
-        // cout << endl;
     }
-    //cout << endl;
 }
 
-void recover()
+void drop()
 {
-    for (int i = 0; i < red.size(); i++)
-        map[candidate[red[i]].y][candidate[red[i]].x] = 2;
-    for (int i = 0; i < green.size(); i++)
-        map[candidate[green[i]].y][candidate[green[i]].x] = 2;
-}
-
-void BFS()
-{
-    int ret = 0;
-
-    while (!RED.empty() || !GREEN.empty())
+    queue<info> que;
+    for (int i = 0; i < candidate.size(); i++)
     {
-        int save_map[51][51];
-        memset(save_map, 0, sizeof(save_map));
+        info cur = candidate[i];
+        new_map[cur.y][cur.x] = cur.color;
+        map_state[cur.y][cur.x] = cur.color;
+        que.push(cur);
+    }
 
-        int red_size = RED.size();
-        for (int i = 0; i < red_size; i++)
+    while (!que.empty())
+    {
+        int SIZE = que.size();
+        for (int i = 0; i < SIZE; i++)
         {
-            info cur = RED.front();
-
-            RED.pop();
+            info cur = que.front();
+            que.pop();
+            cout << cur.y << " " << cur.x << endl;
             for (int j = 0; j < 4; j++)
             {
                 int dy = cur.y + dir[j][0];
                 int dx = cur.x + dir[j][1];
-                if (inside(dy, dx) && (covermap[dy][dx] == 1 || covermap[dy][dx] == 2))
-                    save_map[dy][dx] = 1;
-            }
-        }
-        int green_size = GREEN.size();
-        for (int i = 0; i < green_size; i++)
-        {
-            info cur = GREEN.front();
-            GREEN.pop();
-            for (int j = 0; j < 4; j++)
-            {
-                int dy = cur.y + dir[j][0];
-                int dx = cur.x + dir[j][1];
-                if (inside(dy, dx) && (covermap[dy][dx] == 1 || covermap[dy][dx] == 2))
+                if (inside(dy, dx) && (new_map[dy][dx] == 1 || new_map[dy][dx] == 2) && map_state[dy][dx] != cur.color)
                 {
-                    if (save_map[dy][dx] == 1)
+                    if (map_state[dy][dx] == 5)
+                        continue;
+                    else if (map_state[dy][dx] != 0)
                     {
-                        covermap[dy][dx] = -1;
-                        save_map[dy][dx] = 0;
-                        ret++;
+                        map_state[dy][dx] = 5;
+                        new_map[dy][dx] = 5;
+                        ans++;
+                        continue;
                     }
-                    else
-                        save_map[dy][dx] = 2;
+                    else if (map_state[dy][dx] == 0)
+                        map_state[dy][dx] = cur.color;
                 }
             }
-        }
-        for (int y_ = 0; y_ < n; y_++)
-        {
-            for (int x_ = 0; x_ < m; x_++)
+            cout << endl;
+            for (int y = 0; y < n; y++)
             {
-                if (save_map[y_][x_] == 1)
+                for (int x = 0; x < m; x++)
                 {
-                    info data;
-                    data.y = y_;
-                    data.x = x_;
-                    covermap[y_][x_] = 3;
-                    RED.push(data);
+                    cout << map_state[y][x] << " ";
                 }
-                else if (save_map[y_][x_] == 2)
+                cout << endl;
+            }
+        }
+
+        for (int y = 0; y < n; y++)
+        {
+            for (int x = 0; x < m; x++)
+            {
+                if (map_state[y][x] != 0 && map_state[y][x] != 5)
                 {
-                    info data;
-                    data.y = y_;
-                    data.x = x_;
-                    covermap[y_][x_] = 4;
-                    GREEN.push(data);
+                    info next;
+                    next.y = y;
+                    next.x = x;
+                    que.push(next);
                 }
             }
         }
     }
-    if (ret > ans)
-        ans = ret;
 }
 
-void DFS(int cur, int depth, int start)
+void DFS(int cur)
 {
-    if (cur == depth && red.size() + green.size() == depth)
+    if (cur == g + r)
     {
+        copy();
         drop();
-        print_map();
-        BFS();
-        recover();
         return;
     }
-
-    for (int i = start; i < candidate.size(); i++)
+    if (g_cnt > 0)
     {
-        if (check[i] == false)
-        {
-            check[i] = true;
-            if (r_cnt > 0)
-            {
-                r_cnt--;
-                red.push_back(i);
-                DFS(cur + 1, depth, i);
-                red.pop_back();
-                r_cnt++;
-            }
-            if (g_cnt > 0)
-            {
-                g_cnt--;
-                green.push_back(i);
-                DFS(cur + 1, depth, i);
-                green.pop_back();
-                g_cnt++;
-            }
-            check[i] = false;
-        }
+        g_cnt -= 1;
+        candidate[cur].color = 3;
+        DFS(cur + 1);
+        g_cnt += 1;
+    }
+    if (r_cnt > 0)
+    {
+        r_cnt -= 1;
+        candidate[cur].color = 4;
+        DFS(cur + 1);
+        r_cnt += 1;
     }
 }
 
@@ -203,7 +150,8 @@ int main(void)
 {
     ios::sync_with_stdio(0);
     cin.tie(0);
+
     Input();
-    DFS(0, r + g, 0);
+    DFS(0);
     cout << ans;
 }
