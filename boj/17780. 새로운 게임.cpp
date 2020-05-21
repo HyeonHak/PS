@@ -1,17 +1,13 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 using namespace std;
 
 int n, k;
-int map[13][13];
-vector<int> map_state[13][13];
-
-int dir[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
-int change_dir[4] = {1, 0, 3, 2};
-bool inside(int y, int x)
-{
-    return y >= 1 && y <= n && x >= 1 && x <= n;
-}
+int dir[5][2] = {{0, 0}, {0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+int cdir[5] = {0, 2, 1, 4, 3};
+int map[14][14];
+vector<int> map_state[14][14];
 
 typedef struct info
 {
@@ -19,52 +15,97 @@ typedef struct info
     int x;
     int d;
 } info;
+info input;
 
-info horse[11];
-
-void move(int num)
+bool inside(int y, int x)
 {
-    info cur = horse[num];
-    int dy = cur.y + dir[horse[num].d][0];
-    int dx = cur.x + dir[horse[num].d][1];
+    return y >= 1 && y <= n && x >= 1 && x <= n;
+}
+
+vector<info> horse;
+
+void Input()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= n; j++)
+            cin >> map[i][j];
+    }
+    horse.push_back(input);
+    for (int i = 1; i <= k; i++)
+    {
+        cin >> input.y >> input.x >> input.d;
+        horse.push_back(input);
+        map_state[input.y][input.x].push_back(i);
+    }
+}
+
+int Move(int number)
+{
+    info cur = horse[number];
+    int dy = cur.y + dir[cur.d][0];
+    int dx = cur.x + dir[cur.d][1];
 
     if (!inside(dy, dx) || map[dy][dx] == 2)
     {
-        horse[num].d = change_dir[horse[num].d];
-        move(num);
+        horse[number].d = cdir[cur.d];
+        dy = cur.y + dir[horse[number].d][0];
+        dx = cur.x + dir[horse[number].d][1];
+        if (!inside(dy, dx) || map[dy][dx] == 2)
+            return map_state[cur.y][cur.x].size();
+        else
+            return Move(number);
+    }
+    else if (map[dy][dx] == 0)
+    {
+        for (int i = 0; i < map_state[cur.y][cur.x].size(); i++)
+        {
+            horse[map_state[cur.y][cur.x][i]].y = dy;
+            horse[map_state[cur.y][cur.x][i]].x = dx;
+            map_state[dy][dx].push_back(map_state[cur.y][cur.x][i]);
+        }
+        map_state[cur.y][cur.x].clear();
+        return map_state[dy][dx].size();
+    }
+    else if (map[dy][dx] == 1)
+    {
+        reverse(map_state[cur.y][cur.x].begin(), map_state[cur.y][cur.x].end());
+        for (int i = 0; i < map_state[cur.y][cur.x].size(); i++)
+        {
+            horse[map_state[cur.y][cur.x][i]].y = dy;
+            horse[map_state[cur.y][cur.x][i]].x = dx;
+            map_state[dy][dx].push_back(map_state[cur.y][cur.x][i]);
+        }
+        map_state[cur.y][cur.x].clear();
+        return map_state[dy][dx].size();
+    }
+    return 0;
+}
+
+int Solve()
+{
+    int ret = 1;
+    while (1)
+    {
+        if (ret >= 1000)
+            return -1;
+        for (int i = 1; i <= k; i++)
+        {
+            if (map_state[horse[i].y][horse[i].x].front() != i)
+                continue;
+            if (Move(i) >= 4)
+                return ret;
+        }
+        ret++;
     }
 }
 
 int main(void)
 {
-    cin.tie(0);
     ios::sync_with_stdio(0);
-
-    cin >> n >> k;
-
-    for (int y = 1; y <= n; y++)
-    {
-        for (int x = 1; x <= n; x++)
-        {
-            cin >> map[y][x];
-        }
-    }
-
-    for (int i = 1; i <= k; i++)
-    {
-        int y, x, d;
-        cin >> y >> x >> d;
-        horse[i] = {y, x, d};
-        map_state[y][x].push_back(i);
-    }
-
-    for (int i = 1; i <= k; i++)
-    {
-        info cur = horse[i];
-        if (map_state[cur.y][cur.x].front() != i)
-            continue;
-        move(i);
-    }
-
-    return (0);
+    cin.tie(0);
+    cout.tie(0);
+    Input();
+    cout << Solve();
 }
